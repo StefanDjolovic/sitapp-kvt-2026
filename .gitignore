@@ -1,0 +1,23 @@
+# Environment and local configuration
+.env
+.env.local
+
+# Java / Maven
+backend/target/
+*.log
+
+# Angular / Node.js
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# IDEs and operating systems
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
