@@ -47,6 +47,9 @@ public class ConversationParticipant {
     @Column(name = "last_read_at")
     private Instant lastReadAt;
 
+    @Column(name = "last_read_message_id")
+    private Long lastReadMessageId;
+
     protected ConversationParticipant() {
     }
 
@@ -92,5 +95,13 @@ public class ConversationParticipant {
 
     public void setLastReadAt(Instant lastReadAt) {
         this.lastReadAt = lastReadAt;
+    }
+
+    public Long getLastReadMessageId() {
+        return lastReadMessageId;
+    }
+
+    public void setLastReadMessageId(Long lastReadMessageId) {
+        this.lastReadMessageId = lastReadMessageId;
     }
 }

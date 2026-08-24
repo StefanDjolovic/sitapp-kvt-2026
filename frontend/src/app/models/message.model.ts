@@ -7,3 +7,12 @@ export interface Message {
   content: string;
   sentAt: string;
 }
+
+export interface SendMessageRequest {
+  senderId: number;
+  content: string;
+}
+
+export interface MarkConversationReadRequest {
+  lastSeenMessageId: number;
+}

@@ -1,0 +1,76 @@
+<main class="conversations-page">
+  <section class="conversations-panel" aria-labelledby="conversations-title" [attr.aria-busy]="loading">
+    <header class="page-heading">
+      <div>
+        <span class="eyebrow">SitApp</span>
+        <h1 id="conversations-title">Razgovori</h1>
+        <p>Poslednje poruke i nepročitani razgovori na jednom mestu.</p>
+      </div>
+      <a class="new-conversation" routerLink="/users/search">+ Novi razgovor</a>
+    </header>
+
+    <div class="conversation-content" aria-live="polite">
+      @if (loading) {
+        <div class="state-card" data-testid="conversations-loading">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Učitavamo razgovore…</p>
+        </div>
+      } @else if (errorMessage) {
+        <div class="state-card state-card--error" role="alert" data-testid="conversations-error">
+          <strong>Razgovori nisu učitani</strong>
+          <p>{{ errorMessage }}</p>
+          <button type="button" (click)="loadConversations()">Pokušaj ponovo</button>
+        </div>
+      } @else if (conversations.length === 0) {
+        <div class="state-card" data-testid="conversations-empty">
+          <span class="empty-icon" aria-hidden="true">•••</span>
+          <strong>Još nemate razgovore</strong>
+          <p>Pronađite korisnika i započnite prvi razgovor.</p>
+          <a routerLink="/users/search">Pronađi korisnika</a>
+        </div>
+      } @else {
+        <ul class="conversation-list" data-testid="conversation-list">
+          @for (conversation of conversations; track conversation.id) {
+            <li>
+              <a class="conversation-row" [routerLink]="['/conversations', conversation.id]">
+                <span class="avatar" aria-hidden="true">
+                  {{ conversation.title.charAt(0).toUpperCase() }}
+                </span>
+                <span class="conversation-row__body">
+                  <span class="conversation-row__topline">
+                    <strong>{{ conversation.title }}</strong>
+                    @if (conversation.lastMessage; as lastMessage) {
+                      <time [attr.datetime]="lastMessage.sentAt">
+                        {{ lastMessage.sentAt | date: 'dd.MM. HH:mm' }}
+                      </time>
+                    }
+                  </span>
+                  <span class="conversation-row__preview">
+                    @if (conversation.lastMessage; as lastMessage) {
+                      <span>
+                        @if (lastMessage.sender.id === currentUserId) {
+                          <span>Vi: </span>
+                        }
+                        {{ lastMessage.content }}
+                      </span>
+                    } @else {
+                      <span class="conversation-row__no-message">Nema poruka</span>
+                    }
+                    @if (conversation.unreadCount > 0) {
+                      <span
+                        class="unread-badge"
+                        [attr.aria-label]="conversation.unreadCount + ' nepročitanih poruka'"
+                      >
+                        {{ conversation.unreadCount }}
+                      </span>
+                    }
+                  </span>
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </section>
+</main>

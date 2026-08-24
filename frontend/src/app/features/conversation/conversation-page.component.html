@@ -1,17 +1,17 @@
 <main class="conversation-page">
-  <section class="conversation-card" aria-labelledby="conversation-title" [attr.aria-busy]="loading">
-    <a class="back-link" routerLink="/users/search">← Nazad na pretragu</a>
+  <section class="conversation-card" aria-labelledby="conversation-title">
+    <a class="back-link" routerLink="/conversations">← Svi razgovori</a>
 
-    @if (loading) {
-      <div class="conversation-state" data-testid="conversation-loading">
+    @if (conversationLoading) {
+      <div class="page-state" data-testid="conversation-loading">
         <span class="spinner" aria-hidden="true"></span>
         <p>Učitavamo razgovor…</p>
       </div>
-    } @else if (errorMessage) {
-      <div class="conversation-state conversation-state--error" role="alert" data-testid="conversation-error">
+    } @else if (conversationErrorMessage) {
+      <div class="page-state page-state--error" role="alert" data-testid="conversation-error">
         <strong>Razgovor nije učitan</strong>
-        <p>{{ errorMessage }}</p>
-        <button type="button" (click)="retry()">Pokušaj ponovo</button>
+        <p>{{ conversationErrorMessage }}</p>
+        <button type="button" (click)="retryConversation()">Pokušaj ponovo</button>
       </div>
     } @else if (conversation) {
       <header class="conversation-header">
@@ -23,18 +23,81 @@
           <h1 id="conversation-title">
             {{ conversation.otherUser.firstName }} {{ conversation.otherUser.lastName }}
           </h1>
-          <p>
-            &#64;{{ conversation.otherUser.username }} · {{ conversation.otherUser.phoneNumber }}
-          </p>
+          <p>&#64;{{ conversation.otherUser.username }}</p>
         </div>
       </header>
 
-      <div class="messages-empty" data-testid="messages-empty">
-        <span aria-hidden="true">•••</span>
-        <h2>Razgovor je spreman</h2>
-        <p>Slanje i prikaz poruka biće dodati u sledećem delu projekta.</p>
-        <small>Kreiran {{ conversation.createdAt | date: 'dd.MM.yyyy. HH:mm' }}</small>
-      </div>
+      <section class="chat" aria-label="Poruke">
+        <div
+          #messageViewport
+          class="message-viewport"
+          [attr.aria-busy]="messagesLoading"
+          aria-live="polite"
+        >
+          @if (messagesLoading) {
+            <div class="message-state" data-testid="messages-loading">
+              <span class="spinner" aria-hidden="true"></span>
+              <p>Učitavamo poruke…</p>
+            </div>
+          } @else if (messagesErrorMessage && messages.length === 0) {
+            <div class="message-state message-state--error" role="alert" data-testid="messages-error">
+              <strong>Poruke nisu učitane</strong>
+              <p>{{ messagesErrorMessage }}</p>
+              <button type="button" (click)="retryMessages()">Pokušaj ponovo</button>
+            </div>
+          } @else if (messages.length === 0) {
+            <div class="message-state" data-testid="messages-empty">
+              <span class="empty-icon" aria-hidden="true">•••</span>
+              <strong>Još nema poruka</strong>
+              <p>Pošaljite prvu poruku i započnite razgovor.</p>
+            </div>
+          } @else {
+            @if (messagesErrorMessage) {
+              <button class="refresh-warning" type="button" (click)="retryMessages()">
+                Osvežavanje nije uspelo — pokušaj ponovo
+              </button>
+            }
+            <ol class="message-list" data-testid="message-list">
+              @for (message of messages; track message.id) {
+                <li
+                  class="message-list__item"
+                  [class.message-list__item--outgoing]="message.sender.id === currentUserId"
+                >
+                  <article class="message-bubble">
+                    @if (message.sender.id !== currentUserId) {
+                      <strong>{{ message.sender.firstName }}</strong>
+                    }
+                    <p>{{ message.content }}</p>
+                    <time [attr.datetime]="message.sentAt">{{ message.sentAt | date: 'HH:mm' }}</time>
+                  </article>
+                </li>
+              }
+            </ol>
+          }
+        </div>
+
+        <form class="composer" (ngSubmit)="sendMessage()">
+          <label for="message-content">Nova poruka</label>
+          <textarea
+            id="message-content"
+            name="content"
+            [(ngModel)]="draft"
+            rows="2"
+            maxlength="4000"
+            placeholder="Napišite poruku…"
+            [disabled]="sending"
+          ></textarea>
+          <div class="composer__footer">
+            <span>{{ draft.length }}/4000</span>
+            <button type="submit" [disabled]="!draft.trim() || sending">
+              {{ sending ? 'Šaljem…' : 'Pošalji' }}
+            </button>
+          </div>
+          @if (sendErrorMessage) {
+            <p class="send-error" role="alert" data-testid="send-error">{{ sendErrorMessage }}</p>
+          }
+        </form>
+      </section>
     }
   </section>
 </main>

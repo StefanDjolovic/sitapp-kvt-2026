@@ -10,9 +10,11 @@ import org.springframework.web.server.ResponseStatusException;
 import rs.ac.uns.ftn.sitapp.domain.Conversation;
 import rs.ac.uns.ftn.sitapp.domain.ConversationParticipant;
 import rs.ac.uns.ftn.sitapp.domain.ConversationType;
+import rs.ac.uns.ftn.sitapp.domain.Message;
 import rs.ac.uns.ftn.sitapp.domain.User;
 import rs.ac.uns.ftn.sitapp.repository.ConversationParticipantRepository;
 import rs.ac.uns.ftn.sitapp.repository.ConversationRepository;
+import rs.ac.uns.ftn.sitapp.repository.MessageRepository;
 import rs.ac.uns.ftn.sitapp.repository.UserRepository;
 
 import java.time.Instant;
@@ -38,6 +40,9 @@ class ConversationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private MessageRepository messageRepository;
 
     @InjectMocks
     private ConversationService conversationService;
@@ -116,6 +121,75 @@ class ConversationServiceTest {
         );
 
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void forbidsSendingMessageForUserWhoIsNotParticipant() {
+        User sender = mock(User.class);
+        Conversation conversation = mock(Conversation.class);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sender));
+        when(conversationRepository.findByIdForUpdate(20L))
+                .thenReturn(Optional.of(conversation));
+        when(participantRepository.findByConversationIdAndUserId(20L, 1L))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException exception = catchThrowableOfType(
+                ResponseStatusException.class,
+                () -> conversationService.sendMessage(20L, 1L, "Hello")
+        );
+
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        verify(conversationRepository).findByIdForUpdate(20L);
+        verifyNoInteractions(messageRepository);
+    }
+
+    @Test
+    void advancesReadMarkerToClientLastSeenMessage() {
+        User currentUser = mock(User.class);
+        Conversation conversation = mock(Conversation.class);
+        ConversationParticipant participant = new ConversationParticipant(
+                conversation,
+                currentUser
+        );
+        Message lastSeenMessage = mock(Message.class);
+        Instant sentAt = Instant.parse("2026-08-24T12:00:00Z");
+        when(lastSeenMessage.getSentAt()).thenReturn(sentAt);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(currentUser));
+        when(conversationRepository.findById(20L)).thenReturn(Optional.of(conversation));
+        when(participantRepository.findForUpdate(20L, 1L))
+                .thenReturn(Optional.of(participant));
+        when(messageRepository.findByIdAndConversationId(15L, 20L))
+                .thenReturn(Optional.of(lastSeenMessage));
+
+        conversationService.markConversationRead(20L, 1L, 15L);
+
+        assertThat(participant.getLastReadMessageId()).isEqualTo(15L);
+        assertThat(participant.getLastReadAt()).isEqualTo(sentAt);
+    }
+
+    @Test
+    void neverMovesReadMarkerBackward() {
+        User currentUser = mock(User.class);
+        Conversation conversation = mock(Conversation.class);
+        ConversationParticipant participant = new ConversationParticipant(
+                conversation,
+                currentUser
+        );
+        Instant currentReadAt = Instant.parse("2026-08-24T12:00:00Z");
+        participant.setLastReadMessageId(20L);
+        participant.setLastReadAt(currentReadAt);
+        Message olderMessage = mock(Message.class);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(currentUser));
+        when(conversationRepository.findById(20L)).thenReturn(Optional.of(conversation));
+        when(participantRepository.findForUpdate(20L, 1L))
+                .thenReturn(Optional.of(participant));
+        when(messageRepository.findByIdAndConversationId(10L, 20L))
+                .thenReturn(Optional.of(olderMessage));
+
+        conversationService.markConversationRead(20L, 1L, 10L);
+
+        assertThat(participant.getLastReadMessageId()).isEqualTo(20L);
+        assertThat(participant.getLastReadAt()).isEqualTo(currentReadAt);
     }
 
     private User user(Long id) {

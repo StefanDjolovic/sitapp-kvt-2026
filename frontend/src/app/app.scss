@@ -33,9 +33,54 @@
   color: #ffffff;
 }
 
+.app-nav {
+  display: flex;
+  gap: 0.35rem;
+
+  a {
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.65rem;
+    color: #54656f;
+    font-size: 0.875rem;
+    font-weight: 650;
+    text-decoration: none;
+
+    &:hover {
+      background: #f0f5f4;
+      color: #006f5b;
+    }
+  }
+}
+
+.app-nav .app-nav__link--active {
+  background: #e7f6f2;
+  color: #006f5b;
+}
+
 .app-header__project {
   color: #54656f;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
+}
+
+@media (max-width: 38rem) {
+  .app-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .app-nav {
+    order: 3;
+    width: 100%;
+
+    a {
+      flex: 1;
+      text-align: center;
+    }
+  }
+
+  .app-header__project {
+    align-self: center;
+  }
 }

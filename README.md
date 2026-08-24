@@ -32,13 +32,18 @@ sitapp-kvt-2026/
 - REST endpoint `GET /api/users/search?query=ana&currentUserId=1`
 - Angular ekran za pretragu sa prikazom rezultata i stanja greške
 - kreiranje ili pronalaženje direktnog razgovora preko `POST /api/conversations/direct`
-- otvaranje direktnog razgovora na Angular stranici `/conversations/:id`
+- pregled direktnih razgovora preko `GET /api/conversations?currentUserId=1`, sortiranih po poslednjoj aktivnosti
+- učitavanje poruka preko `GET /api/conversations/{id}/messages?currentUserId=1`
+- slanje tekstualnih poruka preko `POST /api/conversations/{id}/messages`
+- označavanje prikazanih poruka kao pročitanih preko `PUT /api/conversations/{id}/read?currentUserId=1`
+- Angular početna stranica sa poslednjom porukom, brojem nepročitanih poruka i automatskim osvežavanjem
+- Angular stranica razgovora sa slanjem poruka i automatskim osvežavanjem na svakih pet sekundi
 - razvojni CORS pristup za Angular aplikaciju na `http://localhost:4200`
 
 Podrazumevani Spring profil je `dev`. U njemu autentikacija još nije potrebna, jer registracija i prijava nisu deo funkcionalnog opsega za ocenu 6. Testni profil ne učitava razvojne korisnike.
 
-Parametar `currentUserId` je opcionalan i služi da se trenutno izabrani razvojni korisnik izostavi iz rezultata pretrage.
-Dok prijava nije deo opsega, frontend na novoj razvojnoj bazi koristi prvog testnog korisnika sa ID-em `1`. Razgovor se učitava preko `GET /api/conversations/{id}?currentUserId=1`.
+Parametar `currentUserId` predstavlja trenutno izabranog razvojnog korisnika. Kod pretrage je opcionalan i služi da se taj korisnik izostavi iz rezultata, dok je kod razgovora obavezan radi provere članstva.
+Dok prijava nije deo opsega, frontend na novoj razvojnoj bazi koristi prvog testnog korisnika sa ID-em `1`.
 
 ## Lokalno pokretanje
 

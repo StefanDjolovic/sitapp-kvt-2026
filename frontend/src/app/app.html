@@ -1,8 +1,18 @@
 <header class="app-header">
-  <a class="app-brand" routerLink="/users/search" aria-label="SitApp početna strana">
+  <a class="app-brand" routerLink="/conversations" aria-label="SitApp početna strana">
     <span class="app-brand__mark" aria-hidden="true">S</span>
     <span>{{ title }}</span>
   </a>
+  <nav class="app-nav" aria-label="Glavna navigacija">
+    <a
+      routerLink="/conversations"
+      routerLinkActive="app-nav__link--active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Razgovori
+    </a>
+    <a routerLink="/users/search" routerLinkActive="app-nav__link--active">Novi razgovor</a>
+  </nav>
   <span class="app-header__project">KVT 2026</span>
 </header>
 

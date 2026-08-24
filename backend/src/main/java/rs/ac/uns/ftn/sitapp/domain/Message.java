@@ -22,7 +22,7 @@ import java.time.Instant;
         indexes = {
                 @Index(
                         name = "idx_message_conversation_sent_at",
-                        columnList = "conversation_id, sent_at"
+                        columnList = "conversation_id, sent_at, id"
                 ),
                 @Index(name = "idx_message_sender", columnList = "sender_id")
         }

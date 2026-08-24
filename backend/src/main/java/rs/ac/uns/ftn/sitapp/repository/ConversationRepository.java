@@ -1,16 +1,40 @@
 package rs.ac.uns.ftn.sitapp.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rs.ac.uns.ftn.sitapp.domain.Conversation;
 import rs.ac.uns.ftn.sitapp.domain.ConversationType;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
     Optional<Conversation> findByIdAndType(Long id, ConversationType type);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT conversation FROM Conversation conversation WHERE conversation.id = :id")
+    Optional<Conversation> findByIdForUpdate(@Param("id") Long id);
+
+    @Query("""
+            SELECT c
+            FROM Conversation c
+            JOIN ConversationParticipant participant
+              ON participant.conversation = c
+            LEFT JOIN Message message
+              ON message.conversation = c
+            WHERE participant.user.id = :userId
+              AND c.type = :type
+            GROUP BY c
+            ORDER BY COALESCE(MAX(message.sentAt), c.createdAt) DESC, c.id DESC
+            """)
+    List<Conversation> findAllForUserOrderByActivityDesc(
+            @Param("userId") Long userId,
+            @Param("type") ConversationType type
+    );
 
     @Query("""
             SELECT c

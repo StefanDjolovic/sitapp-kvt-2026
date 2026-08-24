@@ -4,7 +4,15 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'users/search',
+    redirectTo: 'conversations',
+  },
+  {
+    path: 'conversations',
+    loadComponent: () =>
+      import('./features/conversations-list/conversations-list.component').then(
+        (component) => component.ConversationsListComponent,
+      ),
+    title: 'Razgovori | SitApp',
   },
   {
     path: 'users/search',
@@ -24,6 +32,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'users/search',
+    redirectTo: 'conversations',
   },
 ];

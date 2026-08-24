@@ -6,6 +6,12 @@ import {
   CreateDirectConversationRequest,
   DirectConversation,
 } from '../models/direct-conversation.model';
+import { ConversationSummary } from '../models/conversation-summary.model';
+import {
+  MarkConversationReadRequest,
+  Message,
+  SendMessageRequest,
+} from '../models/message.model';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationService {
@@ -20,6 +26,35 @@ export class ConversationService {
   getById(conversationId: number, currentUserId: number): Observable<DirectConversation> {
     const params = new HttpParams().set('currentUserId', currentUserId);
     return this.http.get<DirectConversation>(`${this.conversationsUrl}/${conversationId}`, {
+      params,
+    });
+  }
+
+  getAll(currentUserId: number): Observable<ConversationSummary[]> {
+    const params = new HttpParams().set('currentUserId', currentUserId);
+    return this.http.get<ConversationSummary[]>(this.conversationsUrl, { params });
+  }
+
+  getMessages(conversationId: number, currentUserId: number): Observable<Message[]> {
+    const params = new HttpParams().set('currentUserId', currentUserId);
+    return this.http.get<Message[]>(`${this.conversationsUrl}/${conversationId}/messages`, {
+      params,
+    });
+  }
+
+  sendMessage(conversationId: number, senderId: number, content: string): Observable<Message> {
+    const request: SendMessageRequest = { senderId, content };
+    return this.http.post<Message>(`${this.conversationsUrl}/${conversationId}/messages`, request);
+  }
+
+  markAsRead(
+    conversationId: number,
+    currentUserId: number,
+    lastSeenMessageId: number,
+  ): Observable<void> {
+    const params = new HttpParams().set('currentUserId', currentUserId);
+    const request: MarkConversationReadRequest = { lastSeenMessageId };
+    return this.http.put<void>(`${this.conversationsUrl}/${conversationId}/read`, request, {
       params,
     });
   }
