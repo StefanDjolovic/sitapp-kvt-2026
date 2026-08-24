@@ -2,7 +2,8 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 
-import { DirectConversation } from '../../models/direct-conversation.model';
+import { ConversationDetails } from '../../models/conversation-details.model';
+import { ConversationType } from '../../models/conversation-type.model';
 import { Message } from '../../models/message.model';
 import { User } from '../../models/user.model';
 import { ConversationService } from '../../services/conversation.service';
@@ -14,27 +15,30 @@ describe('ConversationPageComponent', () => {
 
   const currentUser: User = {
     id: 1,
-    username: 'stefan.pavlovic',
-    firstName: 'Stefan',
-    lastName: 'Pavlović',
-    phoneNumber: '+381608888888',
-  };
-  const ana: User = {
-    id: 2,
     username: 'ana.petrovic',
     firstName: 'Ana',
     lastName: 'Petrović',
     phoneNumber: '+381601111111',
   };
-  const conversation: DirectConversation = {
+  const marko: User = {
+    id: 2,
+    username: 'marko.jovanovic',
+    firstName: 'Marko',
+    lastName: 'Jovanović',
+    phoneNumber: '+381602222222',
+  };
+  const conversation: ConversationDetails = {
     id: 15,
-    otherUser: ana,
+    type: ConversationType.Direct,
+    title: 'Marko Jovanović',
+    otherUser: marko,
+    participants: [currentUser, marko],
     createdAt: '2026-08-24T10:30:00Z',
   };
   const firstMessage: Message = {
     id: 20,
     conversationId: 15,
-    sender: ana,
+    sender: marko,
     content: 'Zdravo!',
     sentAt: '2026-08-24T10:31:00Z',
   };
@@ -48,14 +52,14 @@ describe('ConversationPageComponent', () => {
   const thirdMessage: Message = {
     id: 22,
     conversationId: 15,
-    sender: ana,
+    sender: marko,
     content: 'Nova poruka',
     sentAt: '2026-08-24T10:33:00Z',
   };
   const fourthMessage: Message = {
     id: 23,
     conversationId: 15,
-    sender: ana,
+    sender: marko,
     content: 'Još jedna poruka',
     sentAt: '2026-08-24T10:34:00Z',
   };
@@ -102,8 +106,39 @@ describe('ConversationPageComponent', () => {
     expect(fixture?.nativeElement.querySelector('[data-testid="message-list"]')).not.toBeNull();
   });
 
+  it('renders a group title, initial and member count', () => {
+    const groupConversation: ConversationDetails = {
+      id: 15,
+      type: ConversationType.Group,
+      title: 'KVT grupa',
+      otherUser: null,
+      participants: [
+        currentUser,
+        marko,
+        {
+          id: 3,
+          username: 'jelena.nikolic',
+          firstName: 'Jelena',
+          lastName: 'Nikolić',
+          phoneNumber: '+381603333333',
+        },
+      ],
+      createdAt: '2026-08-24T10:30:00Z',
+    };
+    conversationService.getById.and.returnValue(of(groupConversation));
+    conversationService.getMessages.and.returnValue(of([]));
+
+    createComponent();
+
+    const header = fixture?.nativeElement.querySelector('.conversation-header') as HTMLElement;
+    expect(header.querySelector('.avatar')?.textContent?.trim()).toBe('K');
+    expect(header.querySelector('.eyebrow')?.textContent).toContain('Grupni razgovor');
+    expect(header.querySelector('h1')?.textContent).toContain('KVT grupa');
+    expect(header.querySelector('p')?.textContent).toContain('3 članova');
+  });
+
   it('starts loading messages only after conversation details are loaded', () => {
-    const conversationDetails = new Subject<DirectConversation>();
+    const conversationDetails = new Subject<ConversationDetails>();
     conversationService.getById.and.returnValue(conversationDetails);
 
     createComponent();
@@ -118,7 +153,7 @@ describe('ConversationPageComponent', () => {
   });
 
   it('does not start message polling if conversation details arrive after destroy', () => {
-    const conversationDetails = new Subject<DirectConversation>();
+    const conversationDetails = new Subject<ConversationDetails>();
     conversationService.getById.and.returnValue(conversationDetails);
 
     createComponent();
@@ -234,5 +269,42 @@ describe('ConversationPageComponent', () => {
     response = [firstMessage, thirdMessage, fourthMessage];
     tick(5_000);
     expect(scrollSpy).toHaveBeenCalledTimes(2);
+  }));
+
+  it('does not mark newly polled messages as read while the user is away from the bottom', fakeAsync(() => {
+    let response = [firstMessage];
+    conversationService.getMessages.and.callFake(() => of(response));
+
+    fixture = TestBed.createComponent(ConversationPageComponent);
+    const component = fixture.componentInstance;
+    spyOn<any>(component, 'isNearBottom').and.returnValue(false);
+    fixture.detectChanges();
+    conversationService.markAsRead.calls.reset();
+
+    response = [firstMessage, thirdMessage];
+    tick(5_000);
+
+    expect(component.messages.map((message) => message.id)).toEqual([20, 22]);
+    expect(conversationService.markAsRead).not.toHaveBeenCalled();
+  }));
+
+  it('marks the latest displayed message as read when the user scrolls to the bottom', fakeAsync(() => {
+    let response = [firstMessage];
+    conversationService.getMessages.and.callFake(() => of(response));
+
+    fixture = TestBed.createComponent(ConversationPageComponent);
+    const component = fixture.componentInstance;
+    const nearBottomSpy = spyOn<any>(component, 'isNearBottom').and.returnValue(false);
+    fixture.detectChanges();
+    conversationService.markAsRead.calls.reset();
+
+    response = [firstMessage, thirdMessage];
+    tick(5_000);
+    expect(conversationService.markAsRead).not.toHaveBeenCalled();
+
+    nearBottomSpy.and.returnValue(true);
+    component.onMessageScroll();
+
+    expect(conversationService.markAsRead).toHaveBeenCalledOnceWith(15, 1, 22);
   }));
 });

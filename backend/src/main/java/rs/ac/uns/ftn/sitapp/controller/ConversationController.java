@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
+import rs.ac.uns.ftn.sitapp.dto.ConversationDetailsResponse;
 import rs.ac.uns.ftn.sitapp.dto.ConversationSummaryResponse;
 import rs.ac.uns.ftn.sitapp.dto.CreateDirectConversationRequest;
 import rs.ac.uns.ftn.sitapp.dto.CreateMessageRequest;
@@ -49,11 +50,11 @@ public class ConversationController {
     }
 
     @GetMapping("/{conversationId}")
-    public DirectConversationResponse getDirectConversation(
+    public ConversationDetailsResponse getConversationDetails(
             @PathVariable @Positive Long conversationId,
             @RequestParam @Positive Long currentUserId
     ) {
-        return conversationService.getDirectConversation(conversationId, currentUserId);
+        return conversationService.getConversationDetails(conversationId, currentUserId);
     }
 
     @GetMapping("/{conversationId}/messages")

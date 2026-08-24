@@ -3,6 +3,7 @@ package rs.ac.uns.ftn.sitapp.config;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import rs.ac.uns.ftn.sitapp.domain.User;
 import rs.ac.uns.ftn.sitapp.repository.UserRepository;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Profile("dev")
+@Order(1)
 public class UserDataInitializer implements ApplicationRunner {
 
     private final UserRepository userRepository;

@@ -110,14 +110,14 @@ class ConversationServiceTest {
         when(firstParticipant.getUser()).thenReturn(otherUser);
         when(secondParticipant.getUser()).thenReturn(anotherUser);
         when(userRepository.findById(1L)).thenReturn(Optional.of(currentUser));
-        when(conversationRepository.findByIdAndType(20L, ConversationType.DIRECT))
+        when(conversationRepository.findById(20L))
                 .thenReturn(Optional.of(conversation));
         when(participantRepository.findByConversationIdOrderById(20L))
                 .thenReturn(List.of(firstParticipant, secondParticipant));
 
         ResponseStatusException exception = catchThrowableOfType(
                 ResponseStatusException.class,
-                () -> conversationService.getDirectConversation(20L, 1L)
+                () -> conversationService.getConversationDetails(20L, 1L)
         );
 
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);

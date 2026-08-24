@@ -9,6 +9,7 @@ import rs.ac.uns.ftn.sitapp.domain.ConversationParticipant;
 import rs.ac.uns.ftn.sitapp.domain.ConversationType;
 import rs.ac.uns.ftn.sitapp.domain.Message;
 import rs.ac.uns.ftn.sitapp.domain.User;
+import rs.ac.uns.ftn.sitapp.dto.ConversationDetailsResponse;
 import rs.ac.uns.ftn.sitapp.dto.ConversationSummaryResponse;
 import rs.ac.uns.ftn.sitapp.dto.DirectConversationResponse;
 import rs.ac.uns.ftn.sitapp.dto.MessageResponse;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ConversationService {
+
+    private static final String GROUP_FALLBACK_TITLE = "Grupni razgovor";
 
     private final ConversationRepository conversationRepository;
     private final ConversationParticipantRepository participantRepository;
@@ -74,30 +77,17 @@ public class ConversationService {
     }
 
     @Transactional(readOnly = true)
-    public DirectConversationResponse getDirectConversation(
+    public ConversationDetailsResponse getConversationDetails(
             Long conversationId,
             Long currentUserId
     ) {
         validatePositiveId(conversationId, "conversationId");
         validatePositiveId(currentUserId, "currentUserId");
-        User currentUser = userRepository.findById(currentUserId)
-                .orElseThrow(() -> userNotFound(currentUserId));
-        Conversation conversation = conversationRepository.findByIdAndType(
-                        conversationId,
-                        ConversationType.DIRECT
-                )
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Direct conversation " + conversationId + " not found"
-                ));
+        requireUser(currentUserId);
+        Conversation conversation = requireConversation(conversationId);
 
         List<ConversationParticipant> participants = participantRepository
                 .findByConversationIdOrderById(conversationId);
-        if (participants.size() != 2) {
-            throw new IllegalStateException(
-                    "DIRECT conversation must have exactly two participants"
-            );
-        }
         boolean currentUserParticipates = participants.stream()
                 .map(ConversationParticipant::getUser)
                 .map(User::getId)
@@ -109,14 +99,30 @@ public class ConversationService {
             );
         }
 
-        User otherUser = participants.stream()
+        List<User> participantUsers = participants.stream()
                 .map(ConversationParticipant::getUser)
-                .filter(user -> !currentUser.getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "DIRECT conversation participants must be different"
-                ));
-        return DirectConversationResponse.from(conversation, otherUser);
+                .toList();
+        User otherUser = null;
+        String title = groupTitle(conversation.getTitle());
+        if (conversation.getType() == ConversationType.DIRECT) {
+            validateDirectParticipants(participantUsers);
+            otherUser = participantUsers.stream()
+                    .filter(user -> !currentUserId.equals(user.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "DIRECT conversation participants must be different"
+                    ));
+            title = fullName(otherUser);
+        }
+
+        return new ConversationDetailsResponse(
+                conversation.getId(),
+                conversation.getType(),
+                title,
+                otherUser == null ? null : UserResponse.from(otherUser),
+                participantUsers.stream().map(UserResponse::from).toList(),
+                conversation.getCreatedAt()
+        );
     }
 
     @Transactional(readOnly = true)
@@ -124,10 +130,7 @@ public class ConversationService {
         validatePositiveId(currentUserId, "currentUserId");
         requireUser(currentUserId);
 
-        return conversationRepository.findAllForUserOrderByActivityDesc(
-                        currentUserId,
-                        ConversationType.DIRECT
-                )
+        return conversationRepository.findAllForUserOrderByActivityDesc(currentUserId)
                 .stream()
                 .map(conversation -> toSummary(conversation, currentUserId))
                 .toList();
@@ -205,23 +208,21 @@ public class ConversationService {
             Long currentUserId
     ) {
         User otherUser = null;
-        String title = conversation.getTitle();
+        String title = groupTitle(conversation.getTitle());
         if (conversation.getType() == ConversationType.DIRECT) {
             List<ConversationParticipant> participants = participantRepository
                     .findByConversationIdOrderById(conversation.getId());
-            if (participants.size() != 2) {
-                throw new IllegalStateException(
-                        "DIRECT conversation must have exactly two participants"
-                );
-            }
-            otherUser = participants.stream()
+            List<User> participantUsers = participants.stream()
                     .map(ConversationParticipant::getUser)
+                    .toList();
+            validateDirectParticipants(participantUsers);
+            otherUser = participantUsers.stream()
                     .filter(user -> !currentUserId.equals(user.getId()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException(
                             "DIRECT conversation participants must be different"
                     ));
-            title = otherUser.getFirstName() + " " + otherUser.getLastName();
+            title = fullName(otherUser);
         }
 
         MessageResponse lastMessage = messageRepository
@@ -240,6 +241,26 @@ public class ConversationService {
                 lastMessage,
                 unreadCount
         );
+    }
+
+    private void validateDirectParticipants(List<User> participants) {
+        long distinctParticipantCount = participants.stream()
+                .map(User::getId)
+                .distinct()
+                .count();
+        if (participants.size() != 2 || distinctParticipantCount != 2) {
+            throw new IllegalStateException(
+                    "DIRECT conversation must have exactly two different participants"
+            );
+        }
+    }
+
+    private String groupTitle(String title) {
+        return title == null || title.isBlank() ? GROUP_FALLBACK_TITLE : title;
+    }
+
+    private String fullName(User user) {
+        return user.getFirstName() + " " + user.getLastName();
     }
 
     private User requireUser(Long userId) {

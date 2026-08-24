@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
+import { ConversationDetails } from '../models/conversation-details.model';
 import { ConversationSummary } from '../models/conversation-summary.model';
 import { ConversationType } from '../models/conversation-type.model';
 import { DirectConversation } from '../models/direct-conversation.model';
@@ -16,12 +17,29 @@ describe('ConversationService', () => {
     id: 15,
     otherUser: {
       id: 2,
-      username: 'ana.petrovic',
-      firstName: 'Ana',
-      lastName: 'Petrović',
-      phoneNumber: '+381601111111',
+      username: 'marko.jovanovic',
+      firstName: 'Marko',
+      lastName: 'Jovanović',
+      phoneNumber: '+381602222222',
     },
     createdAt: '2026-08-24T10:30:00Z',
+  };
+  const conversationDetails: ConversationDetails = {
+    id: conversation.id,
+    type: ConversationType.Direct,
+    title: 'Marko Jovanović',
+    otherUser: conversation.otherUser,
+    participants: [
+      {
+        id: 1,
+        username: 'ana.petrovic',
+        firstName: 'Ana',
+        lastName: 'Petrović',
+        phoneNumber: '+381601111111',
+      },
+      conversation.otherUser,
+    ],
+    createdAt: conversation.createdAt,
   };
   const message: Message = {
     id: 20,
@@ -33,7 +51,7 @@ describe('ConversationService', () => {
   const summary: ConversationSummary = {
     id: 15,
     type: ConversationType.Direct,
-    title: 'Ana Petrović',
+    title: 'Marko Jovanović',
     otherUser: conversation.otherUser,
     lastMessage: message,
     unreadCount: 1,
@@ -60,7 +78,7 @@ describe('ConversationService', () => {
   });
 
   it('loads a conversation for the current user', () => {
-    service.getById(15, 1).subscribe((response) => expect(response).toEqual(conversation));
+    service.getById(15, 1).subscribe((response) => expect(response).toEqual(conversationDetails));
 
     const request = httpTesting.expectOne(
       (candidate) =>
@@ -68,7 +86,7 @@ describe('ConversationService', () => {
         candidate.params.get('currentUserId') === '1',
     );
     expect(request.request.method).toBe('GET');
-    request.flush(conversation);
+    request.flush(conversationDetails);
   });
 
   it('loads the current user conversations', () => {

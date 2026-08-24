@@ -64,6 +64,18 @@
   letter-spacing: 0.12em;
 }
 
+.app-header__context {
+  display: grid;
+  gap: 0.15rem;
+  text-align: right;
+}
+
+.app-header__user {
+  color: #3b4a54;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
 @media (max-width: 38rem) {
   .app-header {
     align-items: flex-start;
@@ -80,7 +92,7 @@
     }
   }
 
-  .app-header__project {
+  .app-header__context {
     align-self: center;
   }
 }

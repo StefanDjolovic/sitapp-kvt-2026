@@ -89,7 +89,7 @@ class ConversationRepositoryTest {
     }
 
     @Test
-    void ordersDirectUserConversationsByLastMessageOrCreationTime() {
+    void ordersAllUserConversationsByLastMessageOrCreationTime() {
         Conversation activeConversation = saveConversationAt(
                 ConversationType.DIRECT,
                 Instant.parse("2026-08-24T08:00:00Z"),
@@ -130,18 +130,21 @@ class ConversationRepositoryTest {
         saveMessage(
                 groupConversation,
                 secondUser,
-                "Group is outside grade 6 scope",
+                "Group activity",
                 Instant.parse("2026-08-24T14:00:00Z")
         );
 
         var result = conversationRepository.findAllForUserOrderByActivityDesc(
-                firstUser.getId(),
-                ConversationType.DIRECT
+                firstUser.getId()
         );
 
         assertThat(result)
                 .extracting(Conversation::getId)
-                .containsExactly(activeConversation.getId(), conversationWithoutMessages.getId());
+                .containsExactly(
+                        groupConversation.getId(),
+                        activeConversation.getId(),
+                        conversationWithoutMessages.getId()
+                );
     }
 
     private Conversation saveConversation(ConversationType type, User... users) {

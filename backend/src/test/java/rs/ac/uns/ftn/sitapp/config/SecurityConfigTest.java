@@ -51,6 +51,18 @@ class SecurityConfigTest {
     }
 
     @Test
+    void allowsCorsRequestsFromAngularDevelopmentServerUsingLoopbackAddress() throws Exception {
+        mockMvc.perform(options("/api/users/search")
+                        .header(HttpHeaders.ORIGIN, "http://127.0.0.1:4200")
+                        .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                        "http://127.0.0.1:4200"
+                ));
+    }
+
+    @Test
     void rejectsCorsRequestsFromOtherOrigins() throws Exception {
         mockMvc.perform(options("/api/users/search")
                         .header(HttpHeaders.ORIGIN, "https://example.com")

@@ -13,7 +13,10 @@ import java.util.Optional;
 
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
-    Optional<Conversation> findByIdAndType(Long id, ConversationType type);
+    Optional<Conversation> findFirstByTypeAndTitle(
+            ConversationType type,
+            String title
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT conversation FROM Conversation conversation WHERE conversation.id = :id")
@@ -27,14 +30,10 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
             LEFT JOIN Message message
               ON message.conversation = c
             WHERE participant.user.id = :userId
-              AND c.type = :type
             GROUP BY c
             ORDER BY COALESCE(MAX(message.sentAt), c.createdAt) DESC, c.id DESC
             """)
-    List<Conversation> findAllForUserOrderByActivityDesc(
-            @Param("userId") Long userId,
-            @Param("type") ConversationType type
-    );
+    List<Conversation> findAllForUserOrderByActivityDesc(@Param("userId") Long userId);
 
     @Query("""
             SELECT c

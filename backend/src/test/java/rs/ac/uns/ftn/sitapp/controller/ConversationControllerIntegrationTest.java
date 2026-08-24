@@ -9,10 +9,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import rs.ac.uns.ftn.sitapp.domain.Conversation;
+import rs.ac.uns.ftn.sitapp.domain.ConversationParticipant;
+import rs.ac.uns.ftn.sitapp.domain.ConversationType;
 import rs.ac.uns.ftn.sitapp.domain.User;
 import rs.ac.uns.ftn.sitapp.repository.ConversationParticipantRepository;
 import rs.ac.uns.ftn.sitapp.repository.ConversationRepository;
 import rs.ac.uns.ftn.sitapp.repository.UserRepository;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -96,6 +101,9 @@ class ConversationControllerIntegrationTest {
                         .param("currentUserId", currentUser.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(conversationId))
+                .andExpect(jsonPath("$.type").value("DIRECT"))
+                .andExpect(jsonPath("$.title").value("Other User"))
+                .andExpect(jsonPath("$.participants.length()").value(2))
                 .andExpect(jsonPath("$.otherUser.id").value(otherUser.getId()));
 
         mockMvc.perform(get("/api/conversations/{id}", conversationId)
@@ -104,6 +112,38 @@ class ConversationControllerIntegrationTest {
                 .andExpect(jsonPath("$.otherUser.id").value(currentUser.getId()));
 
         mockMvc.perform(get("/api/conversations/{id}", conversationId)
+                        .param("currentUserId", outsideUser.getId().toString()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void returnsGroupDetailsWithParticipantsAndForbidsOutsider() throws Exception {
+        User thirdMember = userRepository.save(
+                new User("conversation.third", "Third", "Member", "+381641000004")
+        );
+        Conversation group = conversationRepository.save(
+                new Conversation(ConversationType.GROUP, " ")
+        );
+        participantRepository.saveAllAndFlush(List.of(
+                new ConversationParticipant(group, currentUser),
+                new ConversationParticipant(group, otherUser),
+                new ConversationParticipant(group, thirdMember)
+        ));
+
+        mockMvc.perform(get("/api/conversations/{id}", group.getId())
+                        .param("currentUserId", currentUser.getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(group.getId()))
+                .andExpect(jsonPath("$.type").value("GROUP"))
+                .andExpect(jsonPath("$.title").value("Grupni razgovor"))
+                .andExpect(jsonPath("$.otherUser").doesNotExist())
+                .andExpect(jsonPath("$.participants.length()").value(3))
+                .andExpect(jsonPath("$.participants[0].id").value(currentUser.getId()))
+                .andExpect(jsonPath("$.participants[1].id").value(otherUser.getId()))
+                .andExpect(jsonPath("$.participants[2].id").value(thirdMember.getId()))
+                .andExpect(jsonPath("$.createdAt").isString());
+
+        mockMvc.perform(get("/api/conversations/{id}", group.getId())
                         .param("currentUserId", outsideUser.getId().toString()))
                 .andExpect(status().isForbidden());
     }

@@ -24,36 +24,46 @@ sitapp-kvt-2026/
 - slanje i prijem tekstualnih poruka
 - pregled razgovora sortiranih po poslednjoj poruci
 - prikaz broja nepročitanih poruka
+- prikaz i otvaranje postojećih grupnih razgovora
 
 ## Trenutno implementirano
 
-- osam razvojnih korisnika koji se automatski dodaju pri prvom pokretanju
+- osam razvojnih korisnika i jedna demo grupa koji se automatski dodaju pri prvom pokretanju
 - pretraga korisnika po korisničkom imenu, imenu, prezimenu ili telefonu
-- REST endpoint `GET /api/users/search?query=ana&currentUserId=1`
+- REST endpoint `GET /api/users/search?query=marko&currentUserId=1`
 - Angular ekran za pretragu sa prikazom rezultata i stanja greške
 - kreiranje ili pronalaženje direktnog razgovora preko `POST /api/conversations/direct`
-- pregled direktnih razgovora preko `GET /api/conversations?currentUserId=1`, sortiranih po poslednjoj aktivnosti
+- pregled direktnih i postojećih grupnih razgovora preko `GET /api/conversations?currentUserId=1`, sortiranih po poslednjoj aktivnosti
 - učitavanje poruka preko `GET /api/conversations/{id}/messages?currentUserId=1`
 - slanje tekstualnih poruka preko `POST /api/conversations/{id}/messages`
 - označavanje prikazanih poruka kao pročitanih preko `PUT /api/conversations/{id}/read?currentUserId=1`
 - Angular početna stranica sa poslednjom porukom, brojem nepročitanih poruka i automatskim osvežavanjem
 - Angular stranica razgovora sa slanjem poruka i automatskim osvežavanjem na svakih pet sekundi
-- razvojni CORS pristup za Angular aplikaciju na `http://localhost:4200`
+- razvojni CORS pristup za Angular aplikaciju na `http://localhost:4200` i `http://127.0.0.1:4200`
 
 Podrazumevani Spring profil je `dev`. U njemu autentikacija još nije potrebna, jer registracija i prijava nisu deo funkcionalnog opsega za ocenu 6. Testni profil ne učitava razvojne korisnike.
 
 Parametar `currentUserId` predstavlja trenutno izabranog razvojnog korisnika. Kod pretrage je opcionalan i služi da se taj korisnik izostavi iz rezultata, dok je kod razgovora obavezan radi provere članstva.
-Dok prijava nije deo opsega, frontend na novoj razvojnoj bazi koristi prvog testnog korisnika sa ID-em `1`.
+Dok prijava nije deo opsega, frontend na čistoj razvojnoj bazi koristi Anu Petrović, prvog testnog korisnika sa ID-em `1`. Aktivni razvojni korisnik je prikazan u zaglavlju aplikacije.
 
 ## Lokalno pokretanje
 
-1. Kopirati `.env.example` u `.env` samo ako su potrebne drugačije vrednosti za PostgreSQL kontejner. Ako se podrazumevane vrednosti promene, odgovarajuće `DB_URL`, `DB_USERNAME` i `DB_PASSWORD` promenljive treba proslediti i backend procesu.
-2. Pokrenuti PostgreSQL sa `docker compose up -d`.
+1. Kopirati `.env.example` u `.env` samo ako su potrebne drugačije vrednosti za PostgreSQL kontejner. Podrazumevane vrednosti već odgovaraju backend konfiguraciji. Ako se promene, odgovarajuće `DB_URL`, `DB_USERNAME` i `DB_PASSWORD` promenljive treba postaviti i u okruženju backend procesa.
+2. Pokrenuti i sačekati PostgreSQL sa `docker compose up -d --wait`.
 3. U direktorijumu `backend` pokrenuti `./mvnw spring-boot:run` (Linux/macOS) ili `.\mvnw.cmd spring-boot:run` (Windows).
 4. U direktorijumu `frontend` pokrenuti `npm install`, a zatim `npm start`.
 
 Backend je dostupan na `http://localhost:8080`, a frontend na `http://localhost:4200`.
 Angular razvojni server automatski prosleđuje zahteve sa putanje `/api` na backend.
+
+Na početnoj stranici čiste razvojne baze prikazana je unapred pripremljena grupa `KVT grupa`. Kreiranje i upravljanje grupama nisu deo opsega za ocenu 6, ali se postojeći grupni razgovor može otvoriti i koristiti za demonstraciju K6 zahteva.
+
+## Kratka demonstracija
+
+1. Otvoriti početnu stranicu i proveriti poslednju poruku i broj nepročitanih poruka u demo grupi.
+2. Otvoriti demo grupu, pročitati postojeću poruku i poslati novu tekstualnu poruku.
+3. Izabrati `Novi razgovor`, pretražiti `Marko` i otvoriti direktan razgovor iz rezultata.
+4. Poslati poruku i vratiti se na početnu stranicu radi provere poretka razgovora.
 
 ## Provere
 

@@ -15,12 +15,12 @@ describe('UserSearchComponent', () => {
   let conversationService: jasmine.SpyObj<ConversationService>;
   let router: jasmine.SpyObj<Router>;
 
-  const ana: User = {
+  const marko: User = {
     id: 2,
-    username: 'ana.petrovic',
-    firstName: 'Ana',
-    lastName: 'Petrović',
-    phoneNumber: '+381601111111',
+    username: 'marko.jovanovic',
+    firstName: 'Marko',
+    lastName: 'Jovanović',
+    phoneNumber: '+381602222222',
   };
 
   beforeEach(async () => {
@@ -49,6 +49,12 @@ describe('UserSearchComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="initial-state"]')).not.toBeNull();
   });
 
+  it('uses an example that is different from the active development user', () => {
+    const input = fixture.nativeElement.querySelector('#user-query') as HTMLInputElement;
+
+    expect(input.placeholder).toBe('Na primer: Marko ili +38160');
+  });
+
   it('does not start a search when the query is blank', () => {
     component.query = '   ';
 
@@ -58,8 +64,8 @@ describe('UserSearchComponent', () => {
   });
 
   it('clears old results when the query is removed', () => {
-    component.users = [ana];
-    component.selectedUser = ana;
+    component.users = [marko];
+    component.selectedUser = marko;
     component.hasSearched = true;
     component.query = '';
 
@@ -71,15 +77,15 @@ describe('UserSearchComponent', () => {
   });
 
   it('renders users returned by the search service', () => {
-    userService.search.and.returnValue(of([ana]));
-    component.query = '  ana  ';
+    userService.search.and.returnValue(of([marko]));
+    component.query = '  marko  ';
 
     component.search();
     fixture.detectChanges();
 
-    expect(userService.search).toHaveBeenCalledOnceWith('ana', 1);
+    expect(userService.search).toHaveBeenCalledOnceWith('marko', 1);
     expect(fixture.nativeElement.querySelector('[data-testid="user-results"]').textContent).toContain(
-      'Ana Petrović',
+      'Marko Jovanović',
     );
   });
 
@@ -95,7 +101,7 @@ describe('UserSearchComponent', () => {
 
   it('shows an error state when the request fails', () => {
     userService.search.and.returnValue(throwError(() => new Error('Network error')));
-    component.query = 'ana';
+    component.query = 'marko';
 
     component.search();
     fixture.detectChanges();
@@ -104,11 +110,11 @@ describe('UserSearchComponent', () => {
   });
 
   it('opens a direct conversation and navigates to it', () => {
-    userService.search.and.returnValue(of([ana]));
+    userService.search.and.returnValue(of([marko]));
     conversationService.openDirect.and.returnValue(
-      of({ id: 15, otherUser: ana, createdAt: '2026-08-24T10:30:00Z' }),
+      of({ id: 15, otherUser: marko, createdAt: '2026-08-24T10:30:00Z' }),
     );
-    component.query = 'ana';
+    component.query = 'marko';
     component.search();
     fixture.detectChanges();
 
@@ -125,7 +131,7 @@ describe('UserSearchComponent', () => {
     const pendingConversation = new Subject<DirectConversation>();
     conversationService.openDirect.and.returnValue(pendingConversation);
 
-    component.openConversation(ana);
+    component.openConversation(marko);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[data-testid="opening-conversation"]')).not.toBeNull();
 

@@ -1,5 +1,5 @@
 <main class="conversation-page">
-  <section class="conversation-card" aria-labelledby="conversation-title">
+  <section class="conversation-card" aria-label="Razgovor">
     <a class="back-link" routerLink="/conversations">← Svi razgovori</a>
 
     @if (conversationLoading) {
@@ -16,14 +16,22 @@
     } @else if (conversation) {
       <header class="conversation-header">
         <span class="avatar" aria-hidden="true">
-          {{ conversation.otherUser.firstName.charAt(0) }}{{ conversation.otherUser.lastName.charAt(0) }}
+          @if (conversation.type === conversationType.Direct && conversation.otherUser) {
+            {{ conversation.otherUser.firstName.charAt(0) }}{{ conversation.otherUser.lastName.charAt(0) }}
+          } @else {
+            {{ conversation.title.charAt(0).toUpperCase() }}
+          }
         </span>
         <div>
-          <span class="eyebrow">Direktan razgovor</span>
-          <h1 id="conversation-title">
-            {{ conversation.otherUser.firstName }} {{ conversation.otherUser.lastName }}
-          </h1>
-          <p>&#64;{{ conversation.otherUser.username }}</p>
+          @if (conversation.type === conversationType.Direct && conversation.otherUser) {
+            <span class="eyebrow">Direktan razgovor</span>
+            <h1>{{ conversation.otherUser.firstName }} {{ conversation.otherUser.lastName }}</h1>
+            <p>&#64;{{ conversation.otherUser.username }}</p>
+          } @else {
+            <span class="eyebrow">Grupni razgovor</span>
+            <h1>{{ conversation.title }}</h1>
+            <p>{{ conversation.participants.length }} članova</p>
+          }
         </div>
       </header>
 
@@ -33,6 +41,7 @@
           class="message-viewport"
           [attr.aria-busy]="messagesLoading"
           aria-live="polite"
+          (scroll)="onMessageScroll()"
         >
           @if (messagesLoading) {
             <div class="message-state" data-testid="messages-loading">

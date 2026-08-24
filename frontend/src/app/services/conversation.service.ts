@@ -6,6 +6,7 @@ import {
   CreateDirectConversationRequest,
   DirectConversation,
 } from '../models/direct-conversation.model';
+import { ConversationDetails } from '../models/conversation-details.model';
 import { ConversationSummary } from '../models/conversation-summary.model';
 import {
   MarkConversationReadRequest,
@@ -23,9 +24,9 @@ export class ConversationService {
     return this.http.post<DirectConversation>(`${this.conversationsUrl}/direct`, request);
   }
 
-  getById(conversationId: number, currentUserId: number): Observable<DirectConversation> {
+  getById(conversationId: number, currentUserId: number): Observable<ConversationDetails> {
     const params = new HttpParams().set('currentUserId', currentUserId);
-    return this.http.get<DirectConversation>(`${this.conversationsUrl}/${conversationId}`, {
+    return this.http.get<ConversationDetails>(`${this.conversationsUrl}/${conversationId}`, {
       params,
     });
   }

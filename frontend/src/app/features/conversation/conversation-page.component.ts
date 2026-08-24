@@ -13,7 +13,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, EMPTY, exhaustMap, finalize, merge, of, Subject, timer } from 'rxjs';
 
 import { DEVELOPMENT_USER_ID } from '../../core/development-user';
-import { DirectConversation } from '../../models/direct-conversation.model';
+import { ConversationDetails } from '../../models/conversation-details.model';
+import { ConversationType } from '../../models/conversation-type.model';
 import { Message } from '../../models/message.model';
 import { ConversationService } from '../../services/conversation.service';
 
@@ -35,7 +36,8 @@ export class ConversationPageComponent implements OnInit {
   @ViewChild('messageViewport') private messageViewport?: ElementRef<HTMLElement>;
 
   readonly currentUserId = DEVELOPMENT_USER_ID;
-  conversation: DirectConversation | null = null;
+  readonly conversationType = ConversationType;
+  conversation: ConversationDetails | null = null;
   messages: Message[] = [];
   draft = '';
   conversationLoading = false;
@@ -78,6 +80,12 @@ export class ConversationPageComponent implements OnInit {
     this.messagesLoading = this.messages.length === 0;
     this.messagesErrorMessage = '';
     this.refreshMessagesRequests.next();
+  }
+
+  onMessageScroll(): void {
+    if (this.isNearBottom()) {
+      this.markDisplayedMessagesAsRead();
+    }
   }
 
   sendMessage(): void {
@@ -177,7 +185,9 @@ export class ConversationPageComponent implements OnInit {
     this.initialMessagesDisplayed = true;
     this.messagesLoading = false;
     this.messagesErrorMessage = '';
-    this.markDisplayedMessagesAsRead();
+    if (isInitialDisplay || wasNearBottom) {
+      this.markDisplayedMessagesAsRead();
+    }
 
     if (isInitialDisplay || (hasNewMessages && wasNearBottom)) {
       this.scrollToLatest();

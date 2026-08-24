@@ -22,4 +22,13 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.app-brand')?.textContent).toContain('SitApp');
   });
+
+  it('shows the active development user', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.app-header__user')?.textContent).toContain(
+      'Razvojni korisnik: Ana Petrović',
+    );
+  });
 });

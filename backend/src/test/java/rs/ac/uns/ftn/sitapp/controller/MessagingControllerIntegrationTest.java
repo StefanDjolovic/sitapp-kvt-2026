@@ -135,7 +135,7 @@ class MessagingControllerIntegrationTest {
     }
 
     @Test
-    void listsDirectConversationsByActivityWithLastMessageAndUnreadCount()
+    void listsDirectAndGroupConversationsByActivityWithLastMessageAndUnreadCount()
             throws Exception {
         Conversation olderDirect = saveConversation(
                 ConversationType.DIRECT,
@@ -184,15 +184,20 @@ class MessagingControllerIntegrationTest {
         mockMvc.perform(get("/api/conversations")
                         .param("currentUserId", currentUser.getId().toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(newerDirect.getId()))
-                .andExpect(jsonPath("$[0].title").value("Outside User"))
-                .andExpect(jsonPath("$[0].otherUser.id").value(outsideUser.getId()))
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].id").value(group.getId()))
+                .andExpect(jsonPath("$[0].type").value("GROUP"))
+                .andExpect(jsonPath("$[0].title").value("Project team"))
+                .andExpect(jsonPath("$[0].otherUser").doesNotExist())
                 .andExpect(jsonPath("$[0].unreadCount").value(1))
-                .andExpect(jsonPath("$[1].id").value(olderDirect.getId()))
-                .andExpect(jsonPath("$[1].title").value("Other User"))
-                .andExpect(jsonPath("$[1].lastMessage.content").value("Own follow-up"))
-                .andExpect(jsonPath("$[1].unreadCount").value(1));
+                .andExpect(jsonPath("$[1].id").value(newerDirect.getId()))
+                .andExpect(jsonPath("$[1].title").value("Outside User"))
+                .andExpect(jsonPath("$[1].otherUser.id").value(outsideUser.getId()))
+                .andExpect(jsonPath("$[1].unreadCount").value(1))
+                .andExpect(jsonPath("$[2].id").value(olderDirect.getId()))
+                .andExpect(jsonPath("$[2].title").value("Other User"))
+                .andExpect(jsonPath("$[2].lastMessage.content").value("Own follow-up"))
+                .andExpect(jsonPath("$[2].unreadCount").value(1));
     }
 
     @Test

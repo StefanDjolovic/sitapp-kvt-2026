@@ -13,7 +13,10 @@
     </a>
     <a routerLink="/users/search" routerLinkActive="app-nav__link--active">Novi razgovor</a>
   </nav>
-  <span class="app-header__project">KVT 2026</span>
+  <div class="app-header__context">
+    <span class="app-header__user">Razvojni korisnik: {{ developmentUserName }}</span>
+    <span class="app-header__project">KVT 2026</span>
+  </div>
 </header>
 
 <router-outlet />
