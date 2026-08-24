@@ -1,0 +1,92 @@
+<main class="search-page">
+  <section class="search-panel" aria-labelledby="search-title" [attr.aria-busy]="loading">
+    <div class="search-panel__intro">
+      <span class="eyebrow">Novi razgovor</span>
+      <h1 id="search-title">Pronađite korisnika</h1>
+      <p>Pretražite po korisničkom imenu, imenu, prezimenu ili broju telefona.</p>
+    </div>
+
+    <form class="search-form" (ngSubmit)="search()">
+      <label for="user-query">Pretraga korisnika</label>
+      <div class="search-form__controls">
+        <input
+          id="user-query"
+          name="query"
+          type="search"
+          [(ngModel)]="query"
+          (ngModelChange)="onQueryChange()"
+          placeholder="Na primer: Ana ili +38160"
+          maxlength="100"
+          autocomplete="off"
+          [disabled]="loading"
+        />
+        <button type="submit" [disabled]="!query.trim() || loading">
+          {{ loading ? 'Pretražujem…' : 'Pretraži' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="results" aria-live="polite">
+      @if (loading) {
+        <div class="state-card" data-testid="loading-state">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Tražimo korisnike…</p>
+        </div>
+      } @else if (errorMessage) {
+        <div class="state-card state-card--error" role="alert" data-testid="error-state">
+          <strong>Došlo je do greške</strong>
+          <p>{{ errorMessage }}</p>
+          <button type="button" class="text-button" (click)="search()">Pokušaj ponovo</button>
+        </div>
+      } @else if (hasSearched && users.length === 0) {
+        <div class="state-card" data-testid="empty-state">
+          <strong>Nema rezultata</strong>
+          <p>Pokušajte sa drugim imenom, korisničkim imenom ili brojem telefona.</p>
+        </div>
+      } @else if (users.length > 0) {
+        <div class="results__heading">
+          <h2>Rezultati</h2>
+          <span>{{ users.length }}</span>
+        </div>
+
+        <ul class="user-list" data-testid="user-results">
+          @for (user of users; track user.id) {
+            <li>
+              <button
+                type="button"
+                class="user-card"
+                [class.user-card--selected]="selectedUser?.id === user.id"
+                [attr.aria-pressed]="selectedUser?.id === user.id"
+                (click)="selectUser(user)"
+              >
+                <span class="user-card__avatar" aria-hidden="true">
+                  {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                </span>
+                <span class="user-card__identity">
+                  <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+                  <span>&#64;{{ user.username }}</span>
+                </span>
+                <span class="user-card__phone">{{ user.phoneNumber }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <div class="state-card state-card--hint" data-testid="initial-state">
+          <strong>Spremni za pretragu</strong>
+          <p>Unesite bar deo podatka korisnika kog tražite.</p>
+        </div>
+      }
+    </div>
+
+    @if (selectedUser) {
+      <aside class="selection" role="status" data-testid="selected-user">
+        <span aria-hidden="true">✓</span>
+        <div>
+          <strong>Izabrali ste: {{ selectedUser.firstName }} {{ selectedUser.lastName }}</strong>
+          <p>Razgovor još nije kreiran.</p>
+        </div>
+      </aside>
+    }
+  </section>
+</main>

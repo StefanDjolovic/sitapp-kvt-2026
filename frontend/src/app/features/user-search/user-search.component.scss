@@ -1,0 +1,269 @@
+:host {
+  display: block;
+}
+
+.search-page {
+  display: grid;
+  min-height: calc(100vh - 4.25rem);
+  place-items: start center;
+  padding: clamp(1.5rem, 5vw, 4rem) 1rem;
+}
+
+.search-panel {
+  width: min(100%, 46rem);
+  padding: clamp(1.5rem, 5vw, 2.75rem);
+  border: 1px solid #e2e8ea;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 1.25rem 3rem rgb(17 27 33 / 8%);
+}
+
+.search-panel__intro {
+  margin-bottom: 1.75rem;
+
+  h1 {
+    margin: 0.35rem 0 0.5rem;
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    margin: 0;
+    color: #54656f;
+    line-height: 1.55;
+  }
+}
+
+.eyebrow {
+  color: #008069;
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.search-form {
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 650;
+  }
+}
+
+.search-form__controls {
+  display: flex;
+  gap: 0.65rem;
+
+  input {
+    min-width: 0;
+    flex: 1;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid #c8d1d4;
+    border-radius: 0.75rem;
+    outline: none;
+
+    &:focus {
+      border-color: #008069;
+      box-shadow: 0 0 0 3px rgb(0 128 105 / 13%);
+    }
+  }
+
+  button {
+    padding: 0.8rem 1.25rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: #008069;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+
+    &:hover:not(:disabled) {
+      background: #006f5b;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+  }
+}
+
+.results {
+  margin-top: 1.75rem;
+}
+
+.results__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  span {
+    color: #667781;
+    font-size: 0.875rem;
+  }
+}
+
+.state-card {
+  display: grid;
+  min-height: 8.5rem;
+  place-items: center;
+  align-content: center;
+  padding: 1.25rem;
+  border: 1px dashed #cbd5d8;
+  border-radius: 0.9rem;
+  color: #3b4a54;
+  text-align: center;
+
+  p {
+    max-width: 31rem;
+    margin: 0.35rem 0 0;
+    color: #667781;
+    line-height: 1.5;
+  }
+}
+
+.state-card--hint {
+  background: #f8fafb;
+}
+
+.state-card--error {
+  border-color: #f0b7b2;
+  background: #fff7f6;
+
+  strong {
+    color: #a32d24;
+  }
+}
+
+.text-button {
+  margin-top: 0.85rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #007461;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 3px solid #d8e4e2;
+  border-top-color: #008069;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.user-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.user-card {
+  display: grid;
+  width: 100%;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.85rem;
+  border: 1px solid #e1e7e9;
+  border-radius: 0.85rem;
+  background: #ffffff;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    border-color: #83bcb2;
+    background: #f7fbfa;
+  }
+}
+
+.user-card--selected {
+  border-color: #008069;
+  background: #edf8f5;
+  box-shadow: 0 0 0 2px rgb(0 128 105 / 10%);
+}
+
+.user-card__avatar {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #d8ece8;
+  color: #006b58;
+  font-weight: 750;
+}
+
+.user-card__identity {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+
+  span {
+    overflow: hidden;
+    color: #667781;
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+  }
+}
+
+.user-card__phone {
+  color: #54656f;
+  font-size: 0.875rem;
+}
+
+.selection {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.85rem;
+  background: #e7f6f2;
+  color: #075e54;
+
+  p {
+    margin: 0.2rem 0 0;
+    color: #3b655f;
+    font-size: 0.875rem;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 36rem) {
+  .search-form__controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .user-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .user-card__phone {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

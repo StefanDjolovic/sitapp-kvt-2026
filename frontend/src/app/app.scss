@@ -3,39 +3,39 @@
   min-height: 100vh;
 }
 
-.setup-page {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: 1.5rem;
-  background: #f0f2f5;
-}
-
-.setup-card {
-  width: min(100%, 32rem);
-  padding: 3rem;
-  border-radius: 1rem;
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4.25rem;
+  padding: 0.75rem clamp(1rem, 5vw, 4rem);
+  border-bottom: 1px solid #dfe5e7;
   background: #ffffff;
-  box-shadow: 0 1rem 3rem rgb(17 27 33 / 10%);
-  text-align: center;
 }
 
-.setup-card__eyebrow {
-  color: #008069;
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #111b21;
+  font-size: 1.15rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.app-brand__mark {
+  display: grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: #008069;
+  color: #ffffff;
+}
+
+.app-header__project {
+  color: #54656f;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-h1 {
-  margin: 0.5rem 0;
-  color: #111b21;
-  font-size: clamp(2.5rem, 8vw, 4rem);
-}
-
-p {
-  margin: 0;
-  color: #54656f;
-  line-height: 1.6;
 }

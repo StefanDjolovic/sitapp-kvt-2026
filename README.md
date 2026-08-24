@@ -30,6 +30,7 @@ sitapp-kvt-2026/
 - osam razvojnih korisnika koji se automatski dodaju pri prvom pokretanju
 - pretraga korisnika po korisničkom imenu, imenu, prezimenu ili telefonu
 - REST endpoint `GET /api/users/search?query=ana&currentUserId=1`
+- Angular ekran za pretragu sa prikazom rezultata i stanja greške
 - razvojni CORS pristup za Angular aplikaciju na `http://localhost:4200`
 
 Podrazumevani Spring profil je `dev`. U njemu autentikacija još nije potrebna, jer registracija i prijava nisu deo funkcionalnog opsega za ocenu 6. Testni profil ne učitava razvojne korisnike.
@@ -44,6 +45,7 @@ Parametar `currentUserId` je opcionalan i služi da se trenutno izabrani razvojn
 4. U direktorijumu `frontend` pokrenuti `npm install`, a zatim `npm start`.
 
 Backend je dostupan na `http://localhost:8080`, a frontend na `http://localhost:4200`.
+Angular razvojni server automatski prosleđuje zahteve sa putanje `/api` na backend.
 
 ## Provere
 
