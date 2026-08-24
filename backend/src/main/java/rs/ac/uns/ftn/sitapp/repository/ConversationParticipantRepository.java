@@ -15,4 +15,6 @@ public interface ConversationParticipantRepository
             Long conversationId,
             Long userId
     );
+
+    List<ConversationParticipant> findByConversationIdOrderById(Long conversationId);
 }

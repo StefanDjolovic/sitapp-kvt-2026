@@ -15,6 +15,14 @@ export const routes: Routes = [
     title: 'Pretraga korisnika | SitApp',
   },
   {
+    path: 'conversations/:id',
+    loadComponent: () =>
+      import('./features/conversation/conversation-page.component').then(
+        (component) => component.ConversationPageComponent,
+      ),
+    title: 'Razgovor | SitApp',
+  },
+  {
     path: '**',
     redirectTo: 'users/search',
   },

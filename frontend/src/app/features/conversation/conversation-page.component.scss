@@ -1,0 +1,161 @@
+:host {
+  display: block;
+}
+
+.conversation-page {
+  display: grid;
+  min-height: calc(100vh - 4.25rem);
+  place-items: start center;
+  padding: clamp(1.5rem, 5vw, 4rem) 1rem;
+}
+
+.conversation-card {
+  width: min(100%, 46rem);
+  overflow: hidden;
+  border: 1px solid #e2e8ea;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 1.25rem 3rem rgb(17 27 33 / 8%);
+}
+
+.back-link {
+  display: inline-block;
+  margin: 1.25rem 1.5rem 0;
+  color: #007461;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.conversation-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e4eaec;
+
+  h1 {
+    margin: 0.2rem 0;
+    font-size: clamp(1.35rem, 4vw, 1.8rem);
+  }
+
+  p {
+    margin: 0;
+    color: #667781;
+  }
+}
+
+.avatar {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #d8ece8;
+  color: #006b58;
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.eyebrow {
+  color: #008069;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.messages-empty,
+.conversation-state {
+  display: grid;
+  min-height: 22rem;
+  place-items: center;
+  align-content: center;
+  padding: 2rem;
+  background: #f7faf9;
+  color: #3b4a54;
+  text-align: center;
+
+  h2,
+  p {
+    margin: 0.45rem 0 0;
+  }
+
+  p {
+    max-width: 28rem;
+    color: #667781;
+    line-height: 1.55;
+  }
+
+  small {
+    margin-top: 1.25rem;
+    color: #86969e;
+  }
+}
+
+.messages-empty > span {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border-radius: 1rem;
+  background: #dcefeb;
+  color: #007461;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.conversation-state--error {
+  background: #fff8f7;
+
+  strong {
+    color: #a32d24;
+  }
+
+  button {
+    margin-top: 1rem;
+    padding: 0.65rem 1rem;
+    border: 0;
+    border-radius: 0.65rem;
+    background: #008069;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 700;
+  }
+}
+
+.spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 3px solid #d8e4e2;
+  border-top-color: #008069;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 32rem) {
+  .conversation-header {
+    align-items: flex-start;
+  }
+
+  .conversation-header p {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}

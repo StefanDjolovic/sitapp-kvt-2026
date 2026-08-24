@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Router } from '@angular/router';
+import { of, Subject, throwError } from 'rxjs';
 
+import { DirectConversation } from '../../models/direct-conversation.model';
 import { User } from '../../models/user.model';
+import { ConversationService } from '../../services/conversation.service';
 import { UserService } from '../../services/user.service';
 import { UserSearchComponent } from './user-search.component';
 
@@ -9,6 +12,8 @@ describe('UserSearchComponent', () => {
   let fixture: ComponentFixture<UserSearchComponent>;
   let component: UserSearchComponent;
   let userService: jasmine.SpyObj<UserService>;
+  let conversationService: jasmine.SpyObj<ConversationService>;
+  let router: jasmine.SpyObj<Router>;
 
   const ana: User = {
     id: 2,
@@ -20,10 +25,19 @@ describe('UserSearchComponent', () => {
 
   beforeEach(async () => {
     userService = jasmine.createSpyObj<UserService>('UserService', ['search']);
+    conversationService = jasmine.createSpyObj<ConversationService>('ConversationService', [
+      'openDirect',
+    ]);
+    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    router.navigate.and.resolveTo(true);
 
     await TestBed.configureTestingModule({
       imports: [UserSearchComponent],
-      providers: [{ provide: UserService, useValue: userService }],
+      providers: [
+        { provide: UserService, useValue: userService },
+        { provide: ConversationService, useValue: conversationService },
+        { provide: Router, useValue: router },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserSearchComponent);
@@ -63,7 +77,7 @@ describe('UserSearchComponent', () => {
     component.search();
     fixture.detectChanges();
 
-    expect(userService.search).toHaveBeenCalledOnceWith('ana');
+    expect(userService.search).toHaveBeenCalledOnceWith('ana', 1);
     expect(fixture.nativeElement.querySelector('[data-testid="user-results"]').textContent).toContain(
       'Ana Petrović',
     );
@@ -89,8 +103,11 @@ describe('UserSearchComponent', () => {
     expect(fixture.nativeElement.querySelector('[data-testid="error-state"]')).not.toBeNull();
   });
 
-  it('selects a user without making another API request', () => {
+  it('opens a direct conversation and navigates to it', () => {
     userService.search.and.returnValue(of([ana]));
+    conversationService.openDirect.and.returnValue(
+      of({ id: 15, otherUser: ana, createdAt: '2026-08-24T10:30:00Z' }),
+    );
     component.query = 'ana';
     component.search();
     fixture.detectChanges();
@@ -99,10 +116,22 @@ describe('UserSearchComponent', () => {
     result.click();
     fixture.detectChanges();
 
-    expect(component.selectedUser).toEqual(ana);
+    expect(conversationService.openDirect).toHaveBeenCalledOnceWith(1, 2);
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/conversations', 15]);
     expect(userService.search).toHaveBeenCalledTimes(1);
-    expect(fixture.nativeElement.querySelector('[data-testid="selected-user"]').textContent).toContain(
-      'Razgovor još nije kreiran',
-    );
+  });
+
+  it('shows opening and error states for a failed conversation request', () => {
+    const pendingConversation = new Subject<DirectConversation>();
+    conversationService.openDirect.and.returnValue(pendingConversation);
+
+    component.openConversation(ana);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="opening-conversation"]')).not.toBeNull();
+
+    pendingConversation.error(new Error('Network error'));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-testid="conversation-error"]')).not.toBeNull();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,40 @@
+<main class="conversation-page">
+  <section class="conversation-card" aria-labelledby="conversation-title" [attr.aria-busy]="loading">
+    <a class="back-link" routerLink="/users/search">← Nazad na pretragu</a>
+
+    @if (loading) {
+      <div class="conversation-state" data-testid="conversation-loading">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Učitavamo razgovor…</p>
+      </div>
+    } @else if (errorMessage) {
+      <div class="conversation-state conversation-state--error" role="alert" data-testid="conversation-error">
+        <strong>Razgovor nije učitan</strong>
+        <p>{{ errorMessage }}</p>
+        <button type="button" (click)="retry()">Pokušaj ponovo</button>
+      </div>
+    } @else if (conversation) {
+      <header class="conversation-header">
+        <span class="avatar" aria-hidden="true">
+          {{ conversation.otherUser.firstName.charAt(0) }}{{ conversation.otherUser.lastName.charAt(0) }}
+        </span>
+        <div>
+          <span class="eyebrow">Direktan razgovor</span>
+          <h1 id="conversation-title">
+            {{ conversation.otherUser.firstName }} {{ conversation.otherUser.lastName }}
+          </h1>
+          <p>
+            &#64;{{ conversation.otherUser.username }} · {{ conversation.otherUser.phoneNumber }}
+          </p>
+        </div>
+      </header>
+
+      <div class="messages-empty" data-testid="messages-empty">
+        <span aria-hidden="true">•••</span>
+        <h2>Razgovor je spreman</h2>
+        <p>Slanje i prikaz poruka biće dodati u sledećem delu projekta.</p>
+        <small>Kreiran {{ conversation.createdAt | date: 'dd.MM.yyyy. HH:mm' }}</small>
+      </div>
+    }
+  </section>
+</main>

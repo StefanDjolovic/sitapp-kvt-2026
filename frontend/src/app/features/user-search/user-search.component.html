@@ -1,5 +1,9 @@
 <main class="search-page">
-  <section class="search-panel" aria-labelledby="search-title" [attr.aria-busy]="loading">
+  <section
+    class="search-panel"
+    aria-labelledby="search-title"
+    [attr.aria-busy]="loading || openingUserId !== null"
+  >
     <div class="search-panel__intro">
       <span class="eyebrow">Novi razgovor</span>
       <h1 id="search-title">Pronađite korisnika</h1>
@@ -18,9 +22,9 @@
           placeholder="Na primer: Ana ili +38160"
           maxlength="100"
           autocomplete="off"
-          [disabled]="loading"
+          [disabled]="loading || openingUserId !== null"
         />
-        <button type="submit" [disabled]="!query.trim() || loading">
+        <button type="submit" [disabled]="!query.trim() || loading || openingUserId !== null">
           {{ loading ? 'Pretražujem…' : 'Pretraži' }}
         </button>
       </div>
@@ -57,7 +61,8 @@
                 class="user-card"
                 [class.user-card--selected]="selectedUser?.id === user.id"
                 [attr.aria-pressed]="selectedUser?.id === user.id"
-                (click)="selectUser(user)"
+                [disabled]="openingUserId !== null"
+                (click)="openConversation(user)"
               >
                 <span class="user-card__avatar" aria-hidden="true">
                   {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
@@ -66,7 +71,9 @@
                   <strong>{{ user.firstName }} {{ user.lastName }}</strong>
                   <span>&#64;{{ user.username }}</span>
                 </span>
-                <span class="user-card__phone">{{ user.phoneNumber }}</span>
+                <span class="user-card__phone">
+                  {{ openingUserId === user.id ? 'Otvaram…' : user.phoneNumber }}
+                </span>
               </button>
             </li>
           }
@@ -79,12 +86,20 @@
       }
     </div>
 
-    @if (selectedUser) {
-      <aside class="selection" role="status" data-testid="selected-user">
-        <span aria-hidden="true">✓</span>
+    @if (openingUserId !== null && selectedUser) {
+      <aside class="selection" role="status" data-testid="opening-conversation">
+        <span class="selection__spinner" aria-hidden="true"></span>
         <div>
-          <strong>Izabrali ste: {{ selectedUser.firstName }} {{ selectedUser.lastName }}</strong>
-          <p>Razgovor još nije kreiran.</p>
+          <strong>Otvaramo razgovor sa {{ selectedUser.firstName }} {{ selectedUser.lastName }}</strong>
+          <p>Sačekajte trenutak.</p>
+        </div>
+      </aside>
+    } @else if (conversationErrorMessage) {
+      <aside class="selection selection--error" role="alert" data-testid="conversation-error">
+        <span aria-hidden="true">!</span>
+        <div>
+          <strong>Razgovor nije otvoren</strong>
+          <p>{{ conversationErrorMessage }}</p>
         </div>
       </aside>
     }

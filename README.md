@@ -31,11 +31,14 @@ sitapp-kvt-2026/
 - pretraga korisnika po korisničkom imenu, imenu, prezimenu ili telefonu
 - REST endpoint `GET /api/users/search?query=ana&currentUserId=1`
 - Angular ekran za pretragu sa prikazom rezultata i stanja greške
+- kreiranje ili pronalaženje direktnog razgovora preko `POST /api/conversations/direct`
+- otvaranje direktnog razgovora na Angular stranici `/conversations/:id`
 - razvojni CORS pristup za Angular aplikaciju na `http://localhost:4200`
 
 Podrazumevani Spring profil je `dev`. U njemu autentikacija još nije potrebna, jer registracija i prijava nisu deo funkcionalnog opsega za ocenu 6. Testni profil ne učitava razvojne korisnike.
 
 Parametar `currentUserId` je opcionalan i služi da se trenutno izabrani razvojni korisnik izostavi iz rezultata pretrage.
+Dok prijava nije deo opsega, frontend na novoj razvojnoj bazi koristi prvog testnog korisnika sa ID-em `1`. Razgovor se učitava preko `GET /api/conversations/{id}?currentUserId=1`.
 
 ## Lokalno pokretanje
 
